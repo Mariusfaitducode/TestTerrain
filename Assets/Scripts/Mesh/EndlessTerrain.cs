@@ -4,7 +4,7 @@ using System.Collections.Generic;
 
 public class EndlessTerrain : MonoBehaviour {
 
-	const float scale = 2.5f;
+	// const float scale = 2.5f;
 
 	const float viewerMoveThresholdForChunkUpdate = 25f;
 	const float sqrViewerMoveThresholdForChunkUpdate = viewerMoveThresholdForChunkUpdate * viewerMoveThresholdForChunkUpdate;
@@ -28,14 +28,14 @@ public class EndlessTerrain : MonoBehaviour {
 		mapGenerator = FindObjectOfType<MapGenerator_2> ();
 
 		maxViewDst = detailLevels [detailLevels.Length - 1].visibleDstThreshold;
-		chunkSize = MapGenerator_2.mapChunkSize - 1;
+		chunkSize = mapGenerator.mapChunkSize - 1;
 		chunksVisibleInViewDst = Mathf.RoundToInt(maxViewDst / chunkSize);
 
 		UpdateVisibleChunks ();
 	}
 
 	void Update() {
-		viewerPosition = new Vector2 (viewer.position.x, viewer.position.z) / scale;
+		viewerPosition = new Vector2 (viewer.position.x, viewer.position.z) / mapGenerator.terrainData.uniformScale;
 
 		if ((viewerPositionOld - viewerPosition).sqrMagnitude > sqrViewerMoveThresholdForChunkUpdate) {
 			viewerPositionOld = viewerPosition;
@@ -98,9 +98,9 @@ public class EndlessTerrain : MonoBehaviour {
 			meshCollider = meshObject.AddComponent<MeshCollider>();
 			meshRenderer.material = material;
 
-			meshObject.transform.position = positionV3 * scale;
+			meshObject.transform.position = positionV3 * mapGenerator.terrainData.uniformScale;
 			meshObject.transform.parent = parent;
-			meshObject.transform.localScale = Vector3.one * scale;
+			meshObject.transform.localScale = Vector3.one * mapGenerator.terrainData.uniformScale;
 			SetVisible(false);
 
 			lodMeshes = new LODMesh[detailLevels.Length];
@@ -117,9 +117,6 @@ public class EndlessTerrain : MonoBehaviour {
 		void OnMapDataReceived(MapData mapData) {
 			this.mapData = mapData;
 			mapDataReceived = true;
-
-			Texture2D texture = TextureGenerator.TextureFromColourMap (mapData.colourMap, MapGenerator_2.mapChunkSize, MapGenerator_2.mapChunkSize);
-			meshRenderer.material.mainTexture = texture;
 
 			UpdateTerrainChunk ();
 		}
